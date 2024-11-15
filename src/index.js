@@ -1,27 +1,45 @@
 const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
-const { pathToFileURL }                 = require('url');
-const path                              = require('path');
-const fs                                = require('fs');
-const ejse                              = require('ejs-electron')
+const { pathToFileURL } = require('url');
+const path = require('path');
+const fs = require('fs');
+const ejse = require('ejs-electron')
 
 // App will create a new window, display the waiting overlay, and hide overlay when the window is ready
 // app is in app.ejs
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) app.quit();
+const { updateElectronApp, UpdateSourceType } = require('update-electron-app')
 // Check for updates except for macOS
-if (process.platform != "darwin") require("update-electron-app")({
-    repo: "DarkShoro/FWLauncher"
-});
-
+if (process.platform !== 'darwin') {
+    updateElectronApp({
+        updateSource: {
+            type: UpdateSourceType.ElectronPublicUpdateService,
+            repo: 'DarkShoro/FWLauncher',
+            host: 'https://github.com/',
+        },
+        logger: require('electron-log')
+    })
+}
 
 var launcherVersion = app.getVersion();
 let win;
 
+
+app.on('uncaughtException', (err) => {
+    //Write error to file
+    fs.writeFileSync(path.join(__dirname, 'error.log'), err);
+});
+
+app.on('unhandledRejection', (err) => {
+    //Write error to file
+    fs.writeFileSync(path.join(__dirname, 'error.log'), err);
+});
+
 function createWindow() {
     // no resizable, no bar
     win = new BrowserWindow({
-        width: 400,
+        width: 1600,
         height: 900,
         webPreferences: {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preload.js'),
@@ -68,7 +86,7 @@ ipcMain.on('maximize-app', () => {
 });
 // app.on('ready', createWindow);
 
-const launchMain = () => {
+function launchMain() {
     if (!app.requestSingleInstanceLock()) return app.quit();
     app.on('second-instance', () => {
         if (win) {
