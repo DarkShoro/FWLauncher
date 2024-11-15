@@ -1,7 +1,7 @@
 {
   "name": "frostworld-launcher",
   "productName": "Frost World Launcher",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "FrostWorld Studio's Game Launcher",
   "main": "src/index.js",
   "scripts": {
@@ -154,5 +154,9 @@
     "jquery": "^3.7.1",
     "swiper": "^11.1.14",
     "update-electron-app": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DarkShoro/FWLauncher.git"
   }
 }

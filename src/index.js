@@ -12,14 +12,7 @@ if (require("electron-squirrel-startup")) app.quit();
 const { updateElectronApp, UpdateSourceType } = require('update-electron-app')
 // Check for updates except for macOS
 if (process.platform !== 'darwin') {
-    updateElectronApp({
-        updateSource: {
-            type: UpdateSourceType.ElectronPublicUpdateService,
-            repo: 'DarkShoro/FWLauncher',
-            host: 'https://github.com/',
-        },
-        logger: require('electron-log')
-    })
+    updateElectronApp()
 }
 
 var launcherVersion = app.getVersion();
