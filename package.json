@@ -1,0 +1,157 @@
+{
+  "name": "frostworld-launcher",
+  "productName": "Frost World Launcher",
+  "version": "0.0.1",
+  "description": "FrostWorld Studio's Game Launcher",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "publish-windows": "electron-forge publish",
+    "publish-mac": "electron-forge publish --arch=x64",
+    "publish-git": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "lib/icons/icon"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "frostworld-launcher",
+            "authors": "FrostWorld Studio",
+            "loadingGif": "./lib/default-splash.gif",
+            "iconUrl": "https://frostworld.studio/favicon.ico",
+            "setupIcon": "./lib/icons/icon.ico"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "format": "ULFO"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-flatpak",
+          "config": {
+            "genericName": "Frost World Launcher",
+            "productName": "Frost World Launcher",
+            "id": "studio.frostworld.launcher",
+            "options": [
+              {
+                "id": "studio.frostworld.launcher"
+              }
+            ],
+            "categories": [
+              "Game"
+            ],
+            "modules": [
+              {
+                "name": "zypak",
+                "sources": [
+                  {
+                    "type": "git",
+                    "url": "https://github.com/refi64/zypak",
+                    "tag": "v2022.04"
+                  }
+                ]
+              }
+            ],
+            "runtimeVersion": "22.08",
+            "baseVersion": "22.08",
+            "icon": "./lib/icons/icon.ico"
+          }
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "DarkShoro",
+              "name": "FWLauncher"
+            },
+            "prerelease": true
+          }
+        }
+      ]
+    }
+  },
+  "build": {
+    "extraResources": [
+      {
+        "from": "./lib/",
+        "to": "lib",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "appId": "studio.frostworld.launcher",
+    "productName": "Frost World Launcher",
+    "copyright": "Copyright © 2024 ${author}",
+    "mac": {
+      "icon": "./lib/icons/icon.icns",
+      "category": "public.app-category.games",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "icon": "./lib/icons/icon.png"
+    },
+    "directories": {
+      "buildResources": "lib"
+    },
+    "protocols": [
+      {
+        "name": "fwlauncher",
+        "schemes": [
+          "fwlauncher"
+        ]
+      }
+    ]
+  },
+  "author": "FrostWorld Studio",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-appx": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.54",
+    "@electron-forge/maker-flatpak": "^6.0.0-beta.64",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "@electron-forge/publisher-github": "^6.0.0-beta.54",
+    "electron": "^33.2.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.2",
+    "ejs-electron": "^3.0.0",
+    "electron-prompt": "^1.6.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "jquery": "^3.7.1",
+    "swiper": "^11.1.14",
+    "update-electron-app": "^3.0.0"
+  }
+}

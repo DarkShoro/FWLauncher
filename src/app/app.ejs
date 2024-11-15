@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <script src="./assets/js/scripts/uicore.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white h-screen" uid="<%=uid%>">
+
+    <div class="gameOverview-background"></div>
+    <div class="shop-background" style="display: none;"></div>
+    <div class="users-background" style="display: none;"></div>
+
+    <%- include('frame') %>
+
+    <!-- Top Navigation -->
+    <%- include('headerNav') %>
+
+    <main class="mt-12">
+        <!-- Main Carousel Section -->
+        <%- include('carousel') %>
+        <%- include('shop') %>
+        <%- include('accounts') %>
+    <main>
+
+    <!-- Bottom Footer -->
+    <%- include('footer') %>
+</body>
+
+<script>
+    window.$ = window.jQuery = require('jquery');
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
+<script src="./assets/js/main.js"></script>
+
+</html>
