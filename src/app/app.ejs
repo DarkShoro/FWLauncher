@@ -21,12 +21,16 @@
     <!-- Top Navigation -->
     <%- include('headerNav') %>
 
-    <main class="mt-12">
+    <main class="mt-12" id="mainContent">
         <!-- Main Carousel Section -->
         <%- include('carousel') %>
         <%- include('shop') %>
         <%- include('accounts') %>
     <main>
+
+    <div id="overlay">
+        <%- include('overlays/login') %>
+    </div>
 
     <!-- Bottom Footer -->
     <%- include('footer') %>

@@ -1,0 +1,79 @@
+<!-- Show the login overlay when there is no user data available -->
+<!-- The overlay fills the entire screen and contains a login form -->
+
+<div id="loginOverlay" style="display: none;"
+    class="fixed top-0 left-0 w-full h-full flex justify-center items-center login-bg">
+    <div class="overlay-content max-w-lg w-full">
+        <img src="./assets/images/fws/fws_white_logo.png" alt="FrostWorld Logo" class="mx-auto">
+        <div class="p-4 bg-purple-fws rounded-md mt-12" id="loginCard">
+            <h1 class="text-2xl font-bold text-center">Login</h1>
+            <form id="loginForm" class="mt-4">
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full" type="text" id="signin_login" name="signin_login"
+                            data-fwstype="placeholder" placeholder="Username or email address"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_password_container">
+                        <input class="fws-form-control w-full" type="password" id="signin_password"
+                            name="signin_password" data-fwstype="placeholder" placeholder="Password"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-6 fws-btn fws-btn-block fws-btn-md "
+                    id="loginSubmit">Login</button>
+            </form>
+        </div>
+        <div class="p-4 bg-purple-fws rounded-md mt-12" id="tfaCard" style="display: none;">
+            <h1 class="text-2xl font-bold text-center">Two Factor Authentication</h1>
+            <form id="loginForm" class="mt-4 grid grid-cols-6 gap-4">
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_1" name="signin_code_1"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_2" name="signin_code_2"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_3" name="signin_code_3"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_4" name="signin_code_4"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_5" name="signin_code_5"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="signin_code_6" name="signin_code_6"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full fws-btn fws-btn-block fws-btn-md col-span-full"
+                    id="loginSubmitWithTfa">Login</button>
+            </form>
+        </div>
+    </div>
+</div>

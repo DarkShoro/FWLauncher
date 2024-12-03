@@ -20,6 +20,36 @@ function fn() {
 		}
 	});
 
+	// the tfa form is from #signin_code_1 to #signin_code_6
+	// when user write a number in the last input, we send the login request
+	// else, we focus the next input
+
+	$("[id^=signin_code_]").each(function () {
+		$(this).on('input', function () {
+			console.log($(this).val());
+
+			if ($(this).val().length == 1) {
+				if ($(this).attr("id") == "signin_code_6") {
+					// send login request
+					// askForLogin(event, email, password, tfa)
+				} else {
+					nextId = parseInt($(this).attr("id").split("_")[2]) + 1;
+					$("#signin_code_" + nextId).focus();
+				}
+			}
+		});
+
+		$(this).on('keydown', function (e) {
+		
+			if (e.key == "Backspace") {
+				e.preventDefault();
+				$(this).val("");
+				prevId = parseInt($(this).attr("id").split("_")[2]) - 1;
+				$("#signin_code_" + prevId).focus();
+			}
+		});
+	});
+
 }
 
 function InitClock() {

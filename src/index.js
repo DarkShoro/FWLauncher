@@ -3,6 +3,8 @@ const { pathToFileURL } = require('url');
 const path = require('path');
 const fs = require('fs');
 const ejse = require('ejs-electron')
+const accounts = require('./libs/accountManager');
+const axios = require('axios').default;
 
 // App will create a new window, display the waiting overlay, and hide overlay when the window is ready
 // app is in app.ejs
@@ -47,7 +49,7 @@ function createWindow() {
     });
 
     const data = {
-        uid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'stock', 'profiles')).length)),
+        uid: accounts.getSelectedAccount()
     }
     Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
 
@@ -55,6 +57,12 @@ function createWindow() {
 
     win.webContents.on('did-finish-load', () => {
         win.webContents.send('hide-overlay');
+    });
+
+    // Send the checkForAccounts() result to the renderer
+
+    win.webContents.on('did-finish-load', () => {
+        win.webContents.send('check-for-accounts', accounts.checkForAccounts());
     });
 
     win.openDevTools();
@@ -106,6 +114,11 @@ function launchMain() {
             app.quit();
         }
     });
+
+    accounts.checkForAccountsFile();
+
 }
+
+
 
 launchMain();

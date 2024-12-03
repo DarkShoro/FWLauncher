@@ -1,7 +1,7 @@
 {
   "name": "frostworld-launcher",
   "productName": "Frost World Launcher",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "FrostWorld Studio's Game Launcher",
   "main": "src/index.js",
   "scripts": {
@@ -17,7 +17,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "lib/icons/icon"
+        "icon": "lib/icons/icon",
+        "asar": true
       },
       "makers": [
         {
@@ -147,6 +148,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.1.2",
+    "axios": "^1.7.7",
     "ejs-electron": "^3.0.0",
     "electron-log": "^5.2.2",
     "electron-prompt": "^1.6.0",
