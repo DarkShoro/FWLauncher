@@ -14,6 +14,8 @@ const ejse = require('ejs-electron')
 const accounts = require('./libs/accountManager');
 const axios = require('axios').default;
 
+let deepLinkUrl = null;
+
 // App will create a new window, display the waiting overlay, and hide overlay when the window is ready
 // app is in app.ejs
 
@@ -196,7 +198,12 @@ async function launchMain() {
         }
     });
 
-    app.setAsDefaultProtocolClient('fwlauncher');
+    if (process.platform === 'win32') {
+        // Correction : indiquer le bon chemin vers ton exécutable
+        app.setAsDefaultProtocolClient('fwlauncher', process.execPath, [path.resolve(process.argv[1])]);
+    } else {
+        app.setAsDefaultProtocolClient('fwlauncher');
+    }
 
     try {
         console.log('Pinging API before launching app...');
@@ -225,5 +232,75 @@ async function launchMain() {
 
     accounts.checkForAccountsFile();
 }
+
+if (process.platform !== 'darwin') {
+    const gotTheLock = app.requestSingleInstanceLock();
+
+    if (!gotTheLock) {
+        app.quit();
+    } else {
+        app.on('second-instance', (event, argv) => {
+            // argv contient l'URL
+            const url = argv.find(arg => arg.startsWith('fwlauncher://'));
+            if (url) {
+                handleDeepLink(url);
+            }
+            if (win) {
+                if (win.isMinimized()) win.restore();
+                win.focus();
+            }
+        });
+    }
+
+    // Lors du premier lancement
+    const url = process.argv.find(arg => arg.startsWith('fwlauncher://'));
+    if (url) deepLinkUrl = url;
+}
+
+function handleDeepLink(url) {
+    console.log('Received deep link:', url);
+
+    // Extraire les informations du lien
+    // fwlauncher://action/?params=X
+    
+    // split the URL to get the action and params
+    // replace 'fwlauncher://' with an empty string
+    const urlObj = url.replace('fwlauncher://', '');
+    const action = urlObj.split('/')[0]; // 'action'
+    const params = urlObj.split('/')[1].replace('?', ''); // 'params=X'
+    console.log('Action:', action);
+    console.log('Params:', params);
+    
+
+    switch (action) {
+        case 'login' : {
+            // User is attempting to login via website!
+            console.log('User is attempting to login via website!');
+
+            // split at "&", if there is no "&", then the params is just the token
+            const paramsArray = params.split('&');
+            if (paramsArray.length > 1) {
+                // If there are multiple params, we assume the first one is the token
+                const token = paramsArray[0].split('=')[1]; // 'token=X'
+                console.log('Token:', token);
+                
+                // Here you can handle the login action, e.g., open a login window or perform login logic
+                accounts.fastReg(token);
+            } else {
+                // If there is only one param, we assume it is the token
+                const token = paramsArray[0].split('=')[1]; // 'token=X'
+                console.log('Token:', token);
+                
+                // Here you can handle the login action, e.g., open a login window or perform login logic
+                accounts.fastReg(token);
+            }
+            break;
+        }
+    }
+
+
+}
+
+
 
 launchMain();

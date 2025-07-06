@@ -553,7 +553,33 @@ function getAccounts() {
     }
 }
 
+function IsLoggedIn() {
+    // Check if the accounts file exists and has a selectedId
+    const accountsPath = path.join(app.getPath('userData'), 'fwaccounts.json');
+    if (!fs.existsSync(accountsPath)) {
+        return false;
+    }
 
+    const accounts = JSON.parse(fs.readFileSync(accountsPath, 'utf-8'));
+    return accounts.selectedId !== null && accounts.selectedId !== undefined && accounts.selectedId !== '' && accounts.selectedId !== 0;
+}
+
+function fastReg(token) {
+    // This function is used to quickly register an account without going through the login process
+    // It will fetch the user data using the token and register the account
+
+    // ONLY WORKS if the user is not logged in
+    if (IsLoggedIn()) {
+        console.warn('Cannot fast register, user is already logged in.');
+        return;
+    }
+
+    console.log('Fast registering account with token:', token);
+    registerAccount(token, false, true);
+}
+
+
+// watch the fwlauncher protocol for logging in from the browser
 
 module.exports = {
     checkForAccountsFile,
@@ -561,5 +587,6 @@ module.exports = {
     getSelectedAccountToken,
     checkForAccounts,
     getAccountInfo,
-    getAccounts
+    getAccounts,
+    fastReg
 };
