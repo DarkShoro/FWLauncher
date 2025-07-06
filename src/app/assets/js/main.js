@@ -198,6 +198,7 @@ function InitNavigation() {
 			// set body's uid to the clicked profile's uid
 			bodyUid = $(this).find(".pfp").attr("uid");
 
+			/*
 			var banner = imageParent.parent().attr("data-banner");
 			// change users-background background to data-banner attribute of the clicked profile with a fade-in effect
 			if (banner) {
@@ -215,7 +216,7 @@ function InitNavigation() {
 				var url = URL.createObjectURL(blob);
 				//$(".users-background").css("background-image", "url(" + url + ")");
 			}
-
+			*/
 
 			// set the user icon to the clicked profile's uid
 			// $("#userProfilePicture").attr("src", "./assets/images/stock/profiles/" + bodyUid + ".png");
@@ -229,7 +230,7 @@ function InitNavigation() {
 			if ($(this).attr("uid") == bodyUid) {
 				$(this).parent().addClass("border-4 border-white");
 				// change users-background background to data-banner attribute of the clicked profile with a fade-in effect
-				var banner = $(this).parent().parent().attr("data-banner");
+				/*var banner = $(this).parent().parent().attr("data-banner");
 
 				// make blob from the b64 banner (data-banner attribute)
 				if (banner) {
@@ -246,7 +247,7 @@ function InitNavigation() {
 					});
 					var url = URL.createObjectURL(blob);
 					//$(".users-background").css("background-image", "url(" + url + ")");
-				}
+				}*/
 
 			}
 		});

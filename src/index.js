@@ -44,6 +44,28 @@ app.on('unhandledRejection', (err) => {
     fs.writeFileSync(path.join(__dirname, 'error.log'), err);
 });
 
+// write every log to stdout and app.log
+const logStream = fs.createWriteStream(path.join(__dirname, 'app.log'), { flags: 'a' });
+console.log = function (...args) {
+    logStream.write(args.join(' ') + '\n');
+    process.stdout.write(args.join(' ') + '\n');
+};
+
+console.error = function (...args) {
+    logStream.write(args.join(' ') + '\n');
+    process.stderr.write(args.join(' ') + '\n');
+};
+
+console.warn = function (...args) {
+    logStream.write(args.join(' ') + '\n');
+    process.stderr.write(args.join(' ') + '\n');
+};
+
+console.info = function (...args) {
+    logStream.write(args.join(' ') + '\n');
+    process.stdout.write(args.join(' ') + '\n');
+};
+
 async function createWindow() {
 
     // no resizable, no bar

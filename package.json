@@ -1,7 +1,7 @@
 {
   "name": "frostworld-launcher",
   "productName": "Frost World Launcher",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "FrostWorld Studio's Game Launcher",
   "main": "src/index.js",
   "scripts": {
