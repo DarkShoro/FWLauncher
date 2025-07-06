@@ -16,9 +16,9 @@
     <div id="userIcon">
         <!-- User Profile Picture & Name under it -->
         <div class="flex flex-col items-center space-y-2">
-            <img src="https://cdn.frostworld.studio/games/media/defaultImage.png" class="w-12 h-12 rounded-full"
+            <img src="<%= account.pfp %>" class="w-12 h-12 rounded-full"
                 alt="User Profile Picture" id="userProfilePicture" />
-            <span id="userProfileName">USERNAME</span>
+            <span id="userProfileName"><%= account.displaynameRaw %></span>
         </div>
     </div>
 </footer>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Library</title>
+    <link rel="stylesheet" href="../assets/css/main.cp.css">
+    <script src="../assets/js/scripts/eui.js"></script>
+</head>
+
+<body class="bg-black text-white h-screen">
+
+    <div class="flex justify-center items-center align-middle flex-col h-full">
+        <img src="../assets/images/fws/fws_white_logo.png" alt="FrostWorld Logo" class="mx-auto mt-12 p-5">
+        <div class="p-4 w-full max-w-lg text-center">
+            <h2 class="text-2xl font-bold">
+                <%= title %>
+            </h2>
+            <p class="mt-2">
+                <%= message %>
+            </p>
+            <div class="flex justify-center items-center align-middle mt-4">
+                <button class="mt-4 fws-btn fws-btn-nox fws-btn-block fws-btn-md retryButton">Retry</button>
+                <button class="mt-4 fws-btn fws-btn-block fws-btn-md ml-4 exitButton">Exit</button>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+<script>
+    window.$ = window.jQuery = require('jquery');
+</script>
+
+</html>

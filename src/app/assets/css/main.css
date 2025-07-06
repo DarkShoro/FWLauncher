@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
     --fws-yellow: #FFDD18;
     --fws-green: #43E085;
@@ -67,6 +69,20 @@ h1, .h1 {
 }
 
 .users-background {
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 90%), 
+        url("../images/profiles/bg.png");
+    transition: background-image 0.5s;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    z-index: -1;
+    filter: brightness(0.6) blur(2px);
+}
+
+.newuser-background {
     width: 100%;
     height: 100%;
     background: 
@@ -385,6 +401,18 @@ swiper-slide.swiper-slide-active div {
     transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, background-size 0.2s ease-in-out, border-color 0.2s ease-in-out;
     transform: skew(-4deg);
     z-index: -1;
+}
+
+.fws-btn-nox::before {
+    background-color: #404dff!important;
+    background-image: linear-gradient(to top, #fff 0, #fff 100%);
+}
+
+.fws-btn-nox:hover::before,
+.fws-btn-nox:focus::before,
+.fws-btn-nox:not(:disabled):not(.disabled):active::before {
+    background-color: #404dff!important;
+    background-size: 100%, 100%!important;
 }
 
 .fws-btn:hover::before,

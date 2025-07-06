@@ -3,67 +3,106 @@
         <div class="flex space-x-8 p-4 w-9/12 justify-center items-center align-middle border-b-2 border-white profilesBar"
             id="profiles">
 
-            <!-- Profile 0 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/0.png" alt="LightShoro" class="rounded-full pfp" uid="0" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">Le beau bg</span>
-            </div>
+            <% 
+            if (accountManager.accounts && accountManager.accounts.length > 0) { 
 
-            <!-- Profile 1 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full border-4 border-white flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/1.png" alt="Mister Nox" class="rounded-full pfp" uid="1" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">Mister Nox</span>
-            </div>
-
-            <!-- Profile 2 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/2.png" alt="Eradium" class="rounded-full pfp" uid="2" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">Eradium</span>
-            </div>
-
-            <!-- Profile 3 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/3.png" alt="Oksanna" class="rounded-full pfp" uid="3" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">Oksanna</span>
-            </div>
-
-            <!-- Profile 4 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/4.png" alt="Saki" class="rounded-full pfp" uid="4" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">Saki</span>
-            </div>
-
-            <!-- Profile 5 -->
-            <div class="flex flex-col items-center profile">
-                <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn">
-                    <!-- Replace with your image URL -->
-                    <img src="./assets/images/stock/profiles/5.png" alt="niicolasjed" class="rounded-full pfp" uid="5" />
-                </div>
-                <span class="text-white font-semibold mt-2 uname">niicolasjed</span>
-            </div>
+                accountManager.accounts.forEach(function(account, index) { %>
+                    <%
+                        accountProfile = account.data.profileCache || {}; 
+                        isSelected = accountProfile.uid === accountManager.selectedAccount;
+                    %>
+                    <div class="flex flex-col items-center profile" data-banner="<%= accountProfile.banner || './assets/images/banners/default.png' %>" data-uid="<%= account.id %>" onclick="switchAccount(event, '<%= account.id %>')">
+                        <div class="w-32 h-32 rounded-full flex items-center justify-center p-1 imgCtn <%= isSelected ? 'selected' : '' %>">
+                            <img src="<%= accountProfile.pfp %>" 
+                                alt="<%= accountProfile.displaynameRaw || accountProfile.username %>" 
+                                class="rounded-full pfp" uid="<%= account.id %>" />
+                        </div>
+                        <span class="text-white font-semibold mt-2 uname"><%= accountProfile.displaynameRaw || accountProfile.username %></span>
+                    </div>
+            <% }); 
+            }
+            %>
 
             <!-- New Profile -->
-            <div class="flex flex-col items-center profile newprofile">
+            <div class="flex flex-col items-center profile newprofile" id="newprofile">
                 <div class="w-32 h-32 rounded-full flex items-center justify-center p-1">
                     <img src="./assets/images/profiles/new_account.png" alt="New Account" class="rounded-full" />
                 </div>
                 <span class="text-white font-semibold mt-2 uname">Nouveau</span>
             </div>
+
+        </div>
+    </div>
+    <div class="flex justify-center items-center align-middle mt-4 min-w-full" id="newAccountContainer" style="display: none;">
+        <div class="p-4 bg-purple-fws rounded-md mt-12 w-full max-w-lg" id="newAccountCard">
+            <h1 class="text-2xl font-bold text-center">Login</h1>
+            <form id="newloginForm" class="mt-4">
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full" type="text" id="new_signin_login" name="new_signin_login"
+                            data-fwstype="placeholder" placeholder="Username or email address"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_password_container">
+                        <input class="fws-form-control w-full" type="password" id="new_signin_password"
+                            name="new_signin_password" data-fwstype="placeholder" placeholder="Password"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-6 fws-btn fws-btn-block fws-btn-md "
+                    id="newloginSubmit">Login</button>
+            </form>
+        </div>
+        <div class="p-4 bg-purple-fws rounded-md mt-12  w-full max-w-lg" id="newtfaCard" style="display: none;">
+            <h1 class="text-2xl font-bold text-center">Two Factor Authentication</h1>
+            <form id="newloginForm" class="mt-4 grid grid-cols-6 gap-4">
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_1" name="new_signin_code_1"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_2" name="new_signin_code_2"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_3" name="new_signin_code_3"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_4" name="new_signin_code_4"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_5" name="new_signin_code_5"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="signin_login_container">
+                        <input class="fws-form-control w-full text-center tfaInput" type="text" id="new_signin_code_6" name="new_signin_code_6"
+                            placeholder="X"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full fws-btn fws-btn-block fws-btn-md col-span-full"
+                    id="newloginSubmitWithTfa">Login</button>
+            </form>
         </div>
     </div>
 </section>
