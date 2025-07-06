@@ -1,7 +1,7 @@
 {
   "name": "frostworld-launcher",
   "productName": "Frost World Launcher",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "FrostWorld Studio's Game Launcher",
   "main": "src/index.js",
   "scripts": {
@@ -159,8 +159,7 @@
     "electron-prompt": "^1.6.0",
     "electron-squirrel-startup": "^1.0.1",
     "jquery": "^3.7.1",
-    "swiper": "^11.1.14",
-    "update-electron-app": "^3.0.0"
+    "swiper": "^11.1.14"
   },
   "repository": {
     "type": "git",

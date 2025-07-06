@@ -3,7 +3,9 @@ const {
     BrowserWindow,
     ipcMain,
     Menu,
-    shell
+    shell,
+    autoUpdater,
+    dialog
 } = require('electron')
 const {
     pathToFileURL
@@ -21,14 +23,46 @@ let deepLinkUrl = null;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) app.quit();
-const {
+
+/*const {
     updateElectronApp,
     UpdateSourceType
 } = require('update-electron-app')
 // Check for updates except for macOS
 if (process.platform !== 'darwin') {
     updateElectronApp()
-}
+}*/
+
+// New autoUpdater setup using Hazel
+const server = 'https//update.frostworld.studio'
+const url = `${server}/update/${process.platform}/${app.getVersion()}`
+
+autoUpdater.setFeedURL({
+    url
+})
+
+setInterval(() => {
+    autoUpdater.checkForUpdates()
+}, 60000)
+
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+    const dialogOpts = {
+        type: 'info',
+        buttons: ['Restart', 'Later'],
+        title: 'Application Update',
+        message: process.platform === 'win32' ? releaseNotes : releaseName,
+        detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+    }
+
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+        if (returnValue.response === 0) autoUpdater.quitAndInstall()
+    })
+})
+
+autoUpdater.on('error', (message) => {
+    console.error('There was a problem updating the application')
+    console.error(message)
+})
 
 var launcherVersion = app.getVersion();
 let win;
@@ -45,25 +79,37 @@ app.on('unhandledRejection', (err) => {
 });
 
 // write every log to stdout and app.log
-const logStream = fs.createWriteStream(path.join(__dirname, 'app.log'), { flags: 'a' });
+const logStream = fs.createWriteStream(path.join(__dirname, 'app.log'), {
+    flags: 'a'
+});
+
+console.logReal = console.log;
+console.errorReal = console.error;
+console.warnReal = console.warn;
+console.infoReal = console.info;
+
 console.log = function (...args) {
     logStream.write(args.join(' ') + '\n');
     process.stdout.write(args.join(' ') + '\n');
+    console.logReal(...args);
 };
 
 console.error = function (...args) {
     logStream.write(args.join(' ') + '\n');
     process.stderr.write(args.join(' ') + '\n');
+    console.errorReal(...args);
 };
 
 console.warn = function (...args) {
     logStream.write(args.join(' ') + '\n');
     process.stderr.write(args.join(' ') + '\n');
+    console.warnReal(...args);
 };
 
 console.info = function (...args) {
     logStream.write(args.join(' ') + '\n');
     process.stdout.write(args.join(' ') + '\n');
+    console.infoReal(...args);
 };
 
 async function createWindow() {
@@ -284,7 +330,7 @@ function handleDeepLink(url) {
 
     // Extraire les informations du lien
     // fwlauncher://action/?params=X
-    
+
     // split the URL to get the action and params
     // replace 'fwlauncher://' with an empty string
     const urlObj = url.replace('fwlauncher://', '');
@@ -292,10 +338,10 @@ function handleDeepLink(url) {
     const params = urlObj.split('/')[1].replace('?', ''); // 'params=X'
     console.log('Action:', action);
     console.log('Params:', params);
-    
+
 
     switch (action) {
-        case 'login' : {
+        case 'login': {
             // User is attempting to login via website!
             console.log('User is attempting to login via website!');
 
@@ -305,14 +351,14 @@ function handleDeepLink(url) {
                 // If there are multiple params, we assume the first one is the token
                 const token = paramsArray[0].split('=')[1]; // 'token=X'
                 console.log('Token:', token);
-                
+
                 // Here you can handle the login action, e.g., open a login window or perform login logic
                 accounts.fastReg(token);
             } else {
                 // If there is only one param, we assume it is the token
                 const token = paramsArray[0].split('=')[1]; // 'token=X'
                 console.log('Token:', token);
-                
+
                 // Here you can handle the login action, e.g., open a login window or perform login logic
                 accounts.fastReg(token);
             }
