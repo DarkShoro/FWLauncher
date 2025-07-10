@@ -55,10 +55,18 @@ document.addEventListener('readystatechange', function () {
                 tfa: tfaCode
             });
         });
+
+        getGames().then(games => {
+            console.log('Games loaded:', games);
+            renderGames(games);
+            constructSwiper(games);
+        }).catch(err => {
+            console.error('Error loading games:', err);
+        });
     }
 });
 
-function askForLogin(event, email, password, tfaCode=null) {
+function askForLogin(event, email, password, tfaCode = null) {
     // send the login request to the main process
     ipcRenderer.send('login', {
         email: email,
@@ -67,7 +75,7 @@ function askForLogin(event, email, password, tfaCode=null) {
     });
 }
 
-function askForNewAccount(event, email, password, tfaCode=null) {
+function askForNewAccount(event, email, password, tfaCode = null) {
     // send the new account request to the main process
     ipcRenderer.send('new-account', {
         email: email,
@@ -114,3 +122,70 @@ ipcRenderer.on('login-failed', (event, arg) => {
 
 });
 
+ipcRenderer.on('hide-overlay', (event, arg) => {
+    // Hide the overlay
+    setTimeout(() => {
+        $('#loaderOverlay').hide();
+    }, 1000);
+});
+
+function getGames() {
+    return new Promise((resolve, reject) => {
+        ipcRenderer.invoke('get-games')
+            .then(games => {
+                console.log('Games received:', games);
+                resolve(games);
+            })
+            .catch(err => {
+                console.error('Error getting games:', err);
+                reject(err);
+            });
+    });
+}
+
+
+
+ipcRenderer.on('download-game-start', (event, arg) => {
+    console.log('Download started for game ID:', arg);
+    // get current game ID from the gameLibOverview data "gameInfo"
+    let libraryOverview = $('#gameLibOverview')[0];
+    let gameInfo = $(libraryOverview).data('gameInfo');
+    
+    let gameId = parseInt(gameInfo, 10);
+
+    if (!isNaN(gameId) && gameId == arg.gameId) {
+        $("#gameButtons").hide();
+        $('#downloadProgress').show();
+        $('#downloadBar').css('width', '0%');
+        $('#downloadSpeed').text('0 KB/s');
+        $('#downloadSize').text('0 MB / 0 MB');
+        $("#downloadPercent").text('0%');
+    }
+    
+    console.log('Current game ID:', gameId, 'Arg game ID:', arg.gameId);
+    
+});
+ipcRenderer.on('download-game-progress', (event, arg) => {
+    console.log('Download progress for game ID:', arg.gameId, 'File:', arg.file, 'Downloaded:', arg.downloadedSize, 'Total:', arg.totalSize);
+    let libraryOverview = $('#gameLibOverview')[0];
+    let gameInfo = $(libraryOverview).data('gameInfo');
+    let gameId = parseInt(gameInfo, 10);
+
+    console.log('Current game ID:', gameId, 'Arg game ID:', arg.gameId);
+
+    if (!isNaN(gameId) && gameId == arg.gameId) {
+        let percentage = (arg.downloadedSize / arg.totalSize) * 100;
+        $("#gameButtons").hide();
+        $('#downloadProgress').show();
+        $('#downloadBar').css('width', percentage + '%');
+        $('#downloadSpeed').text(arg.downloadSpeed);
+        $("#downloadPercent").text(`${percentage.toFixed(2)}%`);
+        $('#downloadSize').text(`${(arg.downloadedSize / 1024 / 1024).toFixed(2)} MB / ${(arg.totalSize / 1024 / 1024).toFixed(2)} MB`);
+    }
+
+});
+ipcRenderer.on('download-game-complete', (event, arg) => {
+    console.log('Download complete for game ID:', arg);
+    $("#gameButtons").show();
+    $('#downloadProgress').hide();
+});

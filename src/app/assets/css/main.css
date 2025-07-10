@@ -68,6 +68,19 @@ h1, .h1 {
     filter: brightness(0.5) blur(2px);
 }
 
+.wave-background {
+    width: 100%;
+    height: 100%;
+    background: black;
+    background-image: none;
+    transition: background-image 0.5s;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    z-index: -2;
+    filter: brightness(0.5);
+}
+
 .users-background {
     width: 100%;
     height: 100%;
@@ -379,6 +392,14 @@ swiper-slide.swiper-slide-active div {
     width: 100%;
 }
 
+.fws-btn-icon {
+    height: 48px;
+    width: 48px;
+    padding: 0;
+    font-size: 2rem!important;
+    justify-content: center;
+}
+
 .fws-btn-md {
     padding: 13.5px 25px;
     font-size: 0.875rem;
@@ -477,3 +498,18 @@ input:focus {
     outline: none;
 }
   
+.bounce-animation {
+    animation: bounce-zoom 3s ease-in-out infinite;
+}
+
+@keyframes bounce-zoom {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

@@ -1,0 +1,27 @@
+<div id="optionsOverlay" style="z-index: 90; display: none;"
+    class="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black/50">
+
+    <!-- Centered simply prompt flexbox to ask for a download location (defaults to C:/FrostWorldLibrary) -->
+    <div class="overlay-content max-w-lg w-full">
+        <div class="p-4 bg-purple-fws rounded-md mt-12" id="optionCard">
+            <h1 class="text-2xl font-bold text-center">Options</h1>
+            <form id="optionForm" class="mt-4">
+                <div class="mb-4">
+                    <div class="col-12" data-sr-item="sign" id="option_path_label_container">
+                        <label for="option_path" class="fws-form-label">Chemin de téléchargement</label>
+                    <div class="col-12 mt-5" data-sr-item="sign" id="option_path_container">
+                        <input class="fws-form-control w-full" type="text" id="option_path" name="option_path"
+                            data-fwstype="placeholder" placeholder="C:/FrostWorldLibrary/NomDuJeu"><span
+                            class="fws-form-control-bg"></span>
+                    </div>
+                </div>
+                <div class="flex flex-row justify-between gap-2">
+                    <button type="submit" class="w-full mt-6 fws-btn fws-btn-block fws-btn-md"
+                        id="optionSubmit">Valider</button>
+                    <button type="button" class="w-full mt-6 fws-btn fws-btn-block fws-btn-md fws-btn-nox"
+                        id="optionCancel">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

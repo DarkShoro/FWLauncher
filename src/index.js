@@ -14,6 +14,7 @@ const path = require('path');
 const fs = require('fs');
 const ejse = require('ejs-electron')
 const accounts = require('./libs/accountManager');
+const gameManager = require('./libs/gameManager');
 const axios = require('axios').default;
 
 let deepLinkUrl = null;
@@ -40,10 +41,6 @@ const url = `${server}/update/${process.platform}/${app.getVersion()}`
 autoUpdater.setFeedURL({
     url
 })
-
-setInterval(() => {
-    autoUpdater.checkForUpdates()
-}, 60000)
 
 autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
     const dialogOpts = {
@@ -132,9 +129,11 @@ async function createWindow() {
 
     var data = {}
 
+    var selectedAccount = accounts.getSelectedAccount();
+    var lastToken = await accounts.getSelectedAccountToken();
+    var accInfo = await accounts.getAccountInfo(lastToken);
+
     if (accounts.getSelectedAccount() !== null) {
-        var lastToken = await accounts.getSelectedAccountToken();
-        var accInfo = await accounts.getAccountInfo(lastToken);
         data = {
             launcherVersion: launcherVersion,
             account: {
@@ -172,6 +171,18 @@ async function createWindow() {
         }
     }
 
+    if (lastToken !== null && lastToken !== undefined) {
+
+        await gameManager.InitManager(lastToken).catch(err => {
+            console.error('Error initializing game manager:', err); -
+            ErrorWindow('Game Manager Error', 'An error occurred while initializing the game manager. Please try again later.');
+            return;
+        })
+
+    } else {
+        console.info('No token found, skipping game manager initialization');
+        gameManager.InitManager("skip");
+    }
 
     Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
 
@@ -188,9 +199,17 @@ async function createWindow() {
     });
 
     win.openDevTools();
+
 }
 
 function ErrorWindow(title, message) {
+
+    // if the win is already created, close it
+    if (win && !win.isDestroyed()) {
+        win.close();
+    }
+
+    // Now, we initialize a new BrowserWindow for the error
     const errorWin = new BrowserWindow({
         width: 600,
         height: 400,
@@ -268,7 +287,12 @@ async function launchMain() {
 
     if (process.platform === 'win32') {
         // Correction : indiquer le bon chemin vers ton exécutable
-        app.setAsDefaultProtocolClient('fwlauncher', process.execPath, [path.resolve(process.argv[1])]);
+        const argument = process.argv[1];
+        if (argument) {
+            app.setAsDefaultProtocolClient('fwlauncher', process.execPath, [path.resolve(argument)]);
+        } else {
+            app.setAsDefaultProtocolClient('fwlauncher', process.execPath);
+        }
     } else {
         app.setAsDefaultProtocolClient('fwlauncher');
     }
@@ -283,6 +307,10 @@ async function launchMain() {
         return;
     }
 
+    setInterval(() => {
+        autoUpdater.checkForUpdates()
+    }, 60000)
+
     app.whenReady().then(() => {
         createWindow();
         app.on("activate", () => {
@@ -290,6 +318,13 @@ async function launchMain() {
                 createWindow();
             }
         });
+        // When fully rendered, hide the overlay
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('hide-overlay');
+        });
+
+        // Check for updates on app launch
+        autoUpdater.checkForUpdates();
     });
 
     app.on('window-all-closed', () => {
@@ -370,5 +405,11 @@ function handleDeepLink(url) {
 }
 
 
+ipcMain.on('je-me-barre', (event) => {
+    // simply minimize the window
+    if (win) {
+        win.minimize();
+    }
+});
 
 launchMain();

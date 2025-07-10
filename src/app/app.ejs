@@ -9,13 +9,10 @@
     <script src="./assets/js/scripts/uicore.js"></script>
 </head>
 
-<body class="bg-gray-900 text-white h-screen" uid="<%= accountManager.selectedAccount %>">
+<body class="bg-gray-900 text-white h-screen overflow-hidden" uid="<%= accountManager.selectedAccount %>">
 
     <div class="gameOverview-background"></div>
-    <div class="shop-background" style="display: none;"></div>
-    <div class="users-background" style="display: none;">
-        <div class="newuser-background" style="display: none;"></div>
-    </div>
+    <div class="wave-background"></div>
     
 
     <%- include('frame') %>
@@ -25,13 +22,16 @@
 
     <main class="mt-12" id="mainContent">
         <!-- Main Carousel Section -->
-        <%- include('carousel') %>
-        <%- include('shop') %>
-        <%- include('accounts') %>
+        <%- include('sections/carousel') %>
+        <%- include('sections/shop') %>
+        <%- include('sections/library') %>
+        <%- include('sections/accounts') %>
     <main>
 
     <div id="overlay">
         <%- include('overlays/login') %>
+        <%- include('overlays/loader') %>
+        <%- include('overlays/gamesettings') %>
     </div>
 
     <!-- Bottom Footer -->
@@ -44,5 +44,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
 <script src="./assets/js/main.js"></script>
+<script src="./assets/js/backdrop.js"></script>
 
 </html>

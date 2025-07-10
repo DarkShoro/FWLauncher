@@ -6,7 +6,7 @@ bodyUid = document.body.getAttribute('uid');
 function fn() {
 
 	InitClock();
-	InitSwiper();
+	//InitSwiper(); -- DEPRECATED, now handled by the gameManager!
 	InitNavigation();
 	InitNewAccountCtner();
 
@@ -91,14 +91,16 @@ function InitSwiper() {
 		on: {
 			init: function () {
 				var slide = this.slides[this.activeIndex];
-				var backdrop = "./assets/images/stock/backdrop/" + slide.getAttribute('data-backdrop') + ".png";
-				changeInfo(slide.getAttribute('data-name'), backdrop);
+				var backdrop = $(slide).attr('data-backdrop') || "./assets/images/stock/backdrop/default.png";
+				console.log("Swiper initialized with backdrop: " + backdrop);
+				console.log("Swiper initialized with slide name: " + $(slide).attr('data-name'));
+				changeInfo($(slide).attr('data-name'), backdrop, slide);
 				IdToSlide = localStorage.getItem('gameSwiperIndex');
 			},
 			slideChange: function () {
 				var slide = this.slides[this.activeIndex];
-				var backdrop = "./assets/images/stock/backdrop/" + slide.getAttribute('data-backdrop') + ".png";
-				changeInfo(slide.getAttribute('data-name'), backdrop);
+				var backdrop = $(slide).attr('data-backdrop') || "./assets/images/stock/backdrop/default.png";
+				changeInfo($(slide).attr('data-name'), backdrop, slide);
 			}
 		}
 	}
@@ -109,7 +111,7 @@ function InitSwiper() {
 
 }
 
-function changeInfo(text, backdrop) {
+function changeInfo(text, backdrop, slide) {
 
 	// if the text is more than 25 characters, replace the rest with "..."
 
@@ -126,7 +128,18 @@ function changeInfo(text, backdrop) {
 	$("#gameTitle").text(text);
 	// display full text on hover in a tooltip
 	$("#gameTitle").attr("title", infoText);
-	$(".gameOverview-background").css("background-image", "url(" + backdrop + ")");
+
+	console.log("Changing game title to: " + text);
+	console.log("Changing backdrop to: " + backdrop);
+
+	//$(".gameOverview-background").css("background-image", "url(" + backdrop + ")");
+	
+	backdrop = backdrop.replace(/\\/g, '/'); // Ensure the path is in the correct format
+
+	var gameId = $(slide).attr('data-game-id');
+	$("#footerDownload").attr("data-currentgameId", gameId);
+
+	document.getElementsByClassName("gameOverview-background")[0].style.backgroundImage = `url('${backdrop}')`;
 }
 
 function InitNavigation() {
@@ -253,6 +266,67 @@ function InitNavigation() {
 		});
 
 	});
+
+	$("#gameoptions").on("click", function () {
+		// Open the game settings overlay
+		$("#optionsOverlay").fadeIn(300);
+	});
+
+	$("#optionSubmit").on("click", function (e) {
+		e.preventDefault();
+		var path = $("#option_path").val();
+		var gameId = $("#gameLibOverview").data("gameInfo");
+		console.log("Game settings submitted for game ID: " + gameId + " with path: " + path);
+		ipcRenderer.invoke('set-game-path', gameId, path)
+			.then(response => {
+				console.log("Game path set successfully:", response);
+				$("#optionsOverlay").fadeOut(300);
+			})
+			.catch(err => {
+				console.error("Error setting game path:", err);
+			});
+	});
+
+	$("#optionCancel").on("click", function () {
+		// Close the game settings overlay
+		$("#optionsOverlay").fadeOut(300);
+		$("#option_path").val($("#option_path").data("defaultPath")); // Reset to default path
+	});
+
+	$("#download").on("click", function () {
+		// Trigger the download process for the selected game
+		var gameId = $("#gameLibOverview").data("gameInfo");
+		console.log("Download button clicked for game ID: " + gameId);
+		console.log("Download requested for game ID: " + gameId);
+		ipcRenderer.send('download-game', gameId);
+	});
+
+	$("#play").on("click", function () {
+		// Trigger the game launch process for the selected game
+		var gameId = $("#gameLibOverview").data("gameInfo");
+		console.log("Play button clicked for game ID: " + gameId);
+		ipcRenderer.invoke('launch-game', gameId)
+			.then(response => {
+				console.log("Game launched successfully:", response);
+			})
+			.catch(err => {
+				console.error("Error launching game:", err);
+			});
+	});
+
+	$("#cancelDownload").on("click", function () {
+		// Cancel the download process for the selected game
+		console.log("Cancel download button clicked");
+		ipcRenderer.send('cancel-download');
+		setTimeout(() => {
+			$("#gameButtons").show();
+			$('#downloadProgress').hide();
+			$("#download").show();
+			$("#play").hide();
+			$("#gameoptions").show();
+
+		}, 1000);
+	});
 }
 
 function InitNewAccountCtner() {
@@ -265,7 +339,7 @@ function InitNewAccountCtner() {
 
 	newProfileBtn.on("click", function () {
 		// toggle the new account container
-		
+
 		if (newAccountContainer.hasClass("slideDown")) {
 			newAccountContainer.removeClass("slideDown");
 			newBg.fadeOut(300);
@@ -290,4 +364,145 @@ function InitNewAccountCtner() {
 	});
 
 
+}
+
+
+function renderGames(games) {
+	console.log("We got a call to render games");
+	console.log(games);
+
+	$("#gameList").empty(); // Clear the game list before rendering
+	games.forEach(game => {
+
+		iconPath = game.assetsPaths.icon || "./assets/images/defaults/gameicon.png"; // Use the cached icon path or a default icon if not available
+		gameName = game.name || "Unknown Game"; // Fallback to "Unknown Game" if name is not available
+
+		html = `
+		<div data-gameflow="${game.id}"
+			class="flex items-center gap-2 bg-black/30 hover:bg-black/50 transition p-2 rounded cursor-pointer">
+			<img src="${iconPath}" alt="Icone" class="w-10 h-10 object-cover rounded-full" />
+			<span class="text-sm text-white">${gameName}</span>
+		</div>
+		`;
+
+		$("#gameList").append(html);
+	});
+
+	// Bind click events to the game items
+	$("#gameList").find("div[data-gameflow]").each(function () {
+		$(this).on("click", function () {
+			var gameFlow = $(this).attr("data-gameflow");
+			console.log("Game clicked: " + gameFlow);
+			// Here you can handle the game launch or navigation
+			// For example, you might want to send an IPC message to launch the game
+			ipcRenderer.invoke('get-game-info', gameFlow)
+				.then(gameInfo => {
+					console.log("Game info received:", gameInfo);
+					// You can now use gameInfo to display more details or launch the game
+					switchgameOverview(gameInfo);
+				})
+				.catch(err => {
+					console.error("Error getting game info:", err);
+				});
+		});
+	});
+
+}
+
+function switchgameOverview(gameInfo) {
+	// Switch to the game overview section and display the game info
+	$("#gameLibOverview").fadeOut(300, function () {
+
+		if (!gameInfo.assetsPaths.icon) {
+			gameInfo.assetsPaths.icon = './assets/images/defaults/gameicon.png'; // Default icon if not provided
+		}
+		if (!gameInfo.assetsPaths.hero) {
+			gameInfo.assetsPaths.hero = './assets/images/defaults/gameicon.png'; // Default hero
+		}
+		if (!gameInfo.assetsPaths.title) {
+			gameInfo.assetsPaths.title = './assets/images/defaults/gameicon.png'; // Default title
+		}
+
+		// Replace \\ with / in the paths for consistency
+		gameInfo.assetsPaths.icon = gameInfo.assetsPaths.icon.replace(/\\/g, '/') || './assets/images/defaults/gameicon.png';
+		gameInfo.assetsPaths.hero = gameInfo.assetsPaths.hero.replace(/\\/g, '/') || './assets/images/defaults/gameicon.png';
+
+		document.getElementById("gameLibOverview-background").style.backgroundImage = `url('${gameInfo.assetsPaths.hero || './assets/images/defaults/gamebanner.png'}')`;
+		$("#gameLibOverview-titleImg").attr("src", gameInfo.assetsPaths.title || './assets/images/defaults/gametitle.png');
+
+		console.log("Switching to game overview for:", gameInfo.name);
+		console.log("Background image set to:", gameInfo.assetsPaths.hero || './assets/images/defaults/gamebanner.png');
+		console.log("Title image set to:", gameInfo.assetsPaths.title || './assets/images/defaults/gametitle.png');
+
+		fullNameOnlyAlpha = gameInfo.name.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/ /g, '_').toLowerCase();
+
+		$("#option_path").val(`C:/FrostWorldLibrary/${fullNameOnlyAlpha}`);
+		$("#option_path").data("defaultPath", `C:/FrostWorldLibrary/${fullNameOnlyAlpha}`); // Store the default path for the game
+
+		$("#gameLibOverview").data("gameInfo", gameInfo.id); // Store the game ID in the overview section
+
+		isInstalledLocally = gameInfo.isInstalledLocally || false; // Check if the game is installed locally
+
+		if (isInstalledLocally) {
+			$("#gameButtons").show();
+			$("#download").hide();
+			$("#gameoptions").hide();
+			$("#play").show();
+		} else {
+			$("#gameButtons").show();
+			$("#download").show();
+			$("#gameoptions").show();
+			$("#play").hide();
+		}
+
+		// Show the game overview section
+		$("#gameLibOverview").fadeIn(300);
+
+	});
+}
+
+function constructSwiper(games) {
+	const swiperContainer = $("#gameSwiper");
+	$("swiperContainer").empty(); // Clear the swiper container before adding new slides
+
+	games.forEach(game => {
+		
+		if (!game.assetsPaths || !game.assetsPaths.card) {
+			console.warn(`No card asset found for game: ${game.name}`);
+			game.assetsPaths.card = null;
+		}
+
+		let cardPath = game.assetsPaths.card || './assets/images/defaults/gamecard.png'; // Use the cached card path or a default card if not available
+		let gameName = game.name || "Unknown Game"; // Fallback to "Unknown Game" if name is not available
+		let backdrop = game.assetsPaths.backdrop;
+		let gameShortName = game.shortname;
+
+		var html = `
+		<swiper-slide data-name="${gameName}" data-backdrop="${backdrop}" data-swiper-slide-id="${gameShortName}" data-game-id="${game.id}">
+            <img src="${cardPath}" />
+        </swiper-slide>`;
+
+		$(swiperContainer).append(html);
+		
+	});
+
+	// right before initializing the swiper, we sort the slides
+	// put the one with default cardpath at the end
+	$(swiperContainer).find("swiper-slide").sort(function (a, b) {
+		let aCardPath = $(a).find("img").attr("src");
+		let bCardPath = $(b).find("img").attr("src");
+
+		if (aCardPath === './assets/images/defaults/gamecard.png') {
+			return 1; // Move to the end
+		} else if (bCardPath === './assets/images/defaults/gamecard.png') {
+			return -1; // Move to the end
+		}
+		return 0; // Keep order
+	}).appendTo(swiperContainer);
+		
+
+	console.log($(swiperContainer).html()); // Log the constructed HTML for debugging
+
+
+	InitSwiper();
 }

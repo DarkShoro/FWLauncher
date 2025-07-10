@@ -160,8 +160,16 @@ async function getSelectedAccountToken() {
         var accountsSelected = accounts.selectedId;
         
         // if the selected id is null, return null
-        if (selectedId === null) {
-            return null;
+        if (accountsSelected === null) {
+            resolve(null);
+            return;
+        }
+
+        // if accounts.accounts is empty, or non existent, or undefined, return null
+        if (!accounts.accounts || accounts.accounts.length === 0) {
+            console.warn('No accounts found in the accounts file.');
+            resolve(null);
+            return;
         }
 
         // get the token from the selected id by goinng through the accounts array
@@ -274,7 +282,6 @@ async function getAccountInfo(token = null) {
                     const mime = pfpResponse.headers['content-type']; // e.g. 'image/png'
                     const base64Pfp = `data:${mime};base64,` + Buffer.from(pfpResponse.data).toString('base64');
                     accounts.accounts[accountIndex].data.profileCache.pfp = base64Pfp;
-                    console.log('Profile picture fetched and encoded in base64:', base64Pfp);
                 } catch (error) {
                     console.error('Error fetching profile picture:', error);
                 }
@@ -287,7 +294,6 @@ async function getAccountInfo(token = null) {
                     const mime = bannerResponse.headers['content-type']; // e.g. 'image/png'
                     const base64Banner = `data:${mime};base64,` + Buffer.from(bannerResponse.data).toString('base64');
                     accounts.accounts[accountIndex].data.profileCache.banner = base64Banner;
-                    console.log('Banner fetched and encoded in base64:', base64Banner);
                 } catch (error) {
                     console.error('Error fetching banner:', error);
                 }
@@ -321,7 +327,6 @@ async function askForLogin(event, email, password, tfa = null) {
         });
 
         const realData = response.data.data;
-        console.log(response.data);
 
         if (realData.success) {
             console.log('Login successful');
