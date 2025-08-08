@@ -35,7 +35,7 @@ if (process.platform !== 'darwin') {
 }*/
 
 // New autoUpdater setup using Hazel
-const server = 'https//update.frostworld.studio'
+const server = 'https://update.frostworld.studio'
 const url = `${server}/update/${process.platform}/${app.getVersion()}`
 
 autoUpdater.setFeedURL({
