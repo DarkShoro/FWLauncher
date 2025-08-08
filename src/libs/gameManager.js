@@ -150,138 +150,50 @@ async function cacheGameAssets(games) {
             });
         }
 
-        let iconPath = null;
-        let heroPath = null;
-        let bannerPath = null;
-        let littleBannerPath = null;
-        let titlePath = null;
-        let cardPath = null;
-        let backdropPath = null;
+        const paths = {
+            iconPath: null,
+            heroPath: null,
+            bannerPath: null,
+            littleBannerPath: null,
+            titlePath: null,
+            cardPath: null,
+            backdropPath: null
+        };
 
-        if (game.assets.icon && game.assets.icon !== '' && game.assets.icon.startsWith('http')) {
-            iconPath = path.join(gameDir, 'icon.png');
+        const assets = [
+            { condition: game.assets.icon, url: game.gameicon, file: 'icon.png', key: 'iconPath', name: 'icon' },
+            { condition: game.assets.hero, url: game.assets.hero, file: 'hero.png', key: 'heroPath', name: 'hero' },
+            { condition: game.assets.banner, url: game.assets.banner, file: 'banner.png', key: 'bannerPath', name: 'banner' },
+            { condition: game.assets.littlebanner, url: game.assets.littlebanner, file: 'littleBanner.png', key: 'littleBannerPath', name: 'little banner' },
+            { condition: game.assets.title, url: game.assets.title, file: 'title.png', key: 'titlePath', name: 'title' },
+            { condition: game.assets.card, url: game.assets.card, file: 'card.png', key: 'cardPath', name: 'card' },
+            { condition: game.assets.backdrop, url: game.assets.backdrop, file: 'backdrop.png', key: 'backdropPath', name: 'backdrop' }
+        ];
 
-            if (!fs.existsSync(iconPath)) {
-                try {
-                    const response = await axios.get(game.gameicon, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(iconPath, response.data);
-                    console.info(`Cached icon for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache icon for game ${game.name}: ${error.message}`);
-                    iconPath = null; // fallback if download failed
+        for (const asset of assets) {
+            const url = asset.url;
+            if (asset.condition && asset.condition !== '' && asset.condition.startsWith('http')) {
+                const filePath = path.join(gameDir, asset.file);
+                if (!fs.existsSync(filePath)) {
+                    try {
+                        const response = await axios.get(url, {
+                            responseType: 'arraybuffer'
+                        });
+                        fs.writeFileSync(filePath, response.data);
+                        console.info(`Cached ${asset.name} for game ${game.name}`);
+                    } catch (error) {
+                        console.warn(`Failed to cache ${asset.name} for game ${game.name}: ${error.message}`);
+                        paths[asset.key] = null;
+                        continue;
+                    }
                 }
-            }
-        }
-
-        // same for hero, banner, and littleBanner
-        if (game.assets.hero && game.assets.hero !== '' && game.assets.hero.startsWith('http')) {
-            heroPath = path.join(gameDir, 'hero.png');
-
-            if (!fs.existsSync(heroPath)) {
-                try {
-                    const response = await axios.get(game.assets.hero, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(heroPath, response.data);
-                    console.info(`Cached hero for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache hero for game ${game.name}: ${error.message}`);
-                    heroPath = null; // fallback if download failed
-                }
-            }
-        }
-
-        if (game.assets.banner && game.assets.banner !== '' && game.assets.banner.startsWith('http')) {
-            bannerPath = path.join(gameDir, 'banner.png');
-            if (!fs.existsSync(bannerPath)) {
-                try {
-                    const response = await axios.get(game.assets.banner, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(bannerPath, response.data);
-                    console.info(`Cached banner for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache banner for game ${game.name}: ${error.message}`);
-                    bannerPath = null; // fallback if download failed
-                }
-            }
-        }
-
-        if (game.assets.littlebanner && game.assets.littlebanner !== '' && game.assets.littlebanner.startsWith('http')) {
-            littleBannerPath = path.join(gameDir, 'littleBanner.png');
-            if (!fs.existsSync(littleBannerPath)) {
-                try {
-                    const response = await axios.get(game.assets.littlebanner, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(littleBannerPath, response.data);
-                    console.info(`Cached little banner for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache little banner for game ${game.name}: ${error.message}`);
-                    littleBannerPath = null; // fallback if download failed
-                }
-            }
-        }
-
-        if (game.assets.title && game.assets.title !== '' && game.assets.title.startsWith('http')) {
-            titlePath = path.join(gameDir, 'title.png');
-            if (!fs.existsSync(titlePath)) {
-                try {
-                    const response = await axios.get(game.assets.title, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(titlePath, response.data);
-                    console.info(`Cached title for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache title for game ${game.name}: ${error.message}`);
-                    titlePath = null; // fallback if download failed
-                }
-            }
-        }
-
-        if (game.assets.card && game.assets.card !== '' && game.assets.card.startsWith('http')) {
-            cardPath = path.join(gameDir, 'card.png');
-            if (!fs.existsSync(cardPath)) {
-                try {
-                    const response = await axios.get(game.assets.card, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(cardPath, response.data);
-                    console.info(`Cached card for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache card for game ${game.name}: ${error.message}`);
-                    cardPath = null; // fallback if download failed
-                }
-            }
-        }   
-
-        if (game.assets.backdrop && game.assets.backdrop !== '' && game.assets.backdrop.startsWith('http')) {
-            backdropPath = path.join(gameDir, 'backdrop.png');
-            if (!fs.existsSync(backdropPath)) {
-                try {
-                    const response = await axios.get(game.assets.backdrop, {
-                        responseType: 'arraybuffer'
-                    });
-                    fs.writeFileSync(backdropPath, response.data);
-                    console.info(`Cached backdrop for game ${game.name}`);
-                } catch (error) {
-                    console.warn(`Failed to cache backdrop for game ${game.name}: ${error.message}`);
-                    backdropPath = null; // fallback if download failed
-                }
+                paths[asset.key] = filePath;
             }
         }
 
         gameAssets.push({
             id: game.id,
-            iconPath: iconPath, // null if missing
-            heroPath: heroPath, // null if missing
-            bannerPath: bannerPath, // null if missing
-            littleBannerPath: littleBannerPath, // null if missing
-            titlePath: titlePath, // null if missing
-            cardPath: cardPath, // null if missing
-            backdropPath: backdropPath // null if missing
+            ...paths
         });
     }
 

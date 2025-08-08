@@ -60,26 +60,17 @@ function checkForAccountsFile() {
 function doesAccountExist(id) {
     // read the "accounts.json" file
     const accounts = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'fwaccounts.json')));
-    // check if the "accounts" array is empty
-    try {
-        if (accounts.accounts.length === 0) {
-            return false;
-        }
-    } catch (e) {
+
+    // validate accounts array
+    if (!accounts.accounts || accounts.accounts.length === 0) {
         return false;
     }
 
-    var found = false;
-    accounts.accounts.forEach(account => {
-        // if the account id is equal to the given id, return true
+    // Use Array.prototype.some for early exit
+    return accounts.accounts.some(account => {
         console.log('Checking account:', account.id, 'against id:', id);
-        if (account.id == id) {
-            found = true;
-            return true; // exit the forEach loop
-        }
+        return account.id == id;
     });
-    // if no account with the given id is found, return false
-    return found;
 }
 
 function getSelectedAccount() {
@@ -135,60 +126,45 @@ async function getTokenFromId(id) {
     // read the "accounts.json" file
     const accounts = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'fwaccounts.json')));
 
-    // if the "accounts" array is empty, return null
-    if (accounts.accounts.length !== 0) {
-        accounts.accounts.forEach(account => {
-            // if the account id is equal to the given id, return the token
-            if (account.id == id) {
-                console.log('Found account with id:', id, 'and token:', account.token);
-                return account.token;
-            } else {
-                console.warn('Account with id:', id, 'not found in accounts file.');
-            }
-        });
-    } else {
+    if (!accounts.accounts || accounts.accounts.length === 0) {
         console.warn('No accounts found in the accounts file.');
+        return null;
     }
+
+    const account = accounts.accounts.find(account => account.id == id);
+    if (account) {
+        console.log('Found account with id:', id, 'and token:', account.token);
+        return account.token;
+    }
+
+    console.warn('Account with id:', id, 'not found in accounts file.');
     return null; // if no account with the given id is found, return null
 }
 
 async function getSelectedAccountToken() {
-    return new Promise((resolve, reject) => {
+    const accounts = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'fwaccounts.json')));
+    const accountsSelected = accounts.selectedId;
 
-        const accounts = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'fwaccounts.json')));
+    // if the selected id is null, return null
+    if (accountsSelected === null) {
+        return null;
+    }
 
-        var accountsSelected = accounts.selectedId;
-        
-        // if the selected id is null, return null
-        if (accountsSelected === null) {
-            resolve(null);
-            return;
-        }
+    // if accounts.accounts is empty, or non existent, or undefined, return null
+    if (!accounts.accounts || accounts.accounts.length === 0) {
+        console.warn('No accounts found in the accounts file.');
+        return null;
+    }
 
-        // if accounts.accounts is empty, or non existent, or undefined, return null
-        if (!accounts.accounts || accounts.accounts.length === 0) {
-            console.warn('No accounts found in the accounts file.');
-            resolve(null);
-            return;
-        }
+    const account = accounts.accounts.find(account => account.id == accountsSelected);
+    if (!account) {
+        console.warn('No token found for selected account with id:', accountsSelected);
+        throw 'No token found for selected account';
+    }
 
-        // get the token from the selected id by goinng through the accounts array
-        var token = null;
-        accounts.accounts.forEach(account => {
-            // if the account id is equal to the selected id, return the token
-            if (account.id == accountsSelected) {
-                console.log('Found account with id:', accountsSelected, 'and token:', account.token);
-                token = account.token;
-            }
-        });
-        
-        if (!token) {
-            console.warn('No token found for selected account with id:', accountsSelected);
-            reject('No token found for selected account');
-        }
-        console.log('Returning token:', token);
-        resolve(token); // resolve the promise with the token
-    });
+    console.log('Found account with id:', accountsSelected, 'and token:', account.token);
+    console.log('Returning token:', account.token);
+    return account.token; // resolve the promise with the token
 }
 
 async function getAccountInfo(token = null) {
