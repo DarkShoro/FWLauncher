@@ -235,9 +235,10 @@ function getInformation(gameId) {
     }
 
     // check in the config file if we have a "mainExecutable" set for this game
-    const userId = accountManager.getSelectedAccount();
+    // This configuration should be shared across all accounts so the installation
+    // state of a game is consistent regardless of who is logged in
     const userDataDir = path.join(app.getPath('userData'), 'userData');
-    const gameConfigFile = path.join(userDataDir, `${userId}_${gameId}_config.json`);
+    const gameConfigFile = path.join(userDataDir, `${gameId}_config.json`);
     let mainExecutable = null;
 
     if (fs.existsSync(gameConfigFile)) {
@@ -439,9 +440,10 @@ function write_config(gameId, key, value) {
     }
 
     // just like the games json, create a "local" save file for the game
-    const userId = accountManager.getSelectedAccount();
+    // Configurations are shared across accounts so that an installed game
+    // is recognized no matter which account is active
     const userDataDir = path.join(app.getPath('userData'), 'userData');
-    const gameConfigFile = path.join(userDataDir, `${userId}_${gameId}_config.json`);
+    const gameConfigFile = path.join(userDataDir, `${gameId}_config.json`);
 
     if (!fs.existsSync(userDataDir)) {
         fs.mkdirSync(userDataDir, {
@@ -472,9 +474,10 @@ function read_config(gameId, key) {
         return null;
     }
     // just like the games json, create a "local" save file for the game
-    const userId = accountManager.getSelectedAccount();
+    // Config files are not tied to a specific account so that installation
+    // information persists across user switches
     const userDataDir = path.join(app.getPath('userData'), 'userData');
-    const gameConfigFile = path.join(userDataDir, `${userId}_${gameId}_config.json`);
+    const gameConfigFile = path.join(userDataDir, `${gameId}_config.json`);
     if (!fs.existsSync(gameConfigFile)) {
         console.warn(`Config file for game ${game.name} (ID: ${gameId}) not found`);
         return null;
@@ -571,24 +574,38 @@ ipcMain.handle('launch-game', (event, gameId) => {
         console.error("Game Manager is not initialized, cannot launch game");
         throw new Error("Game Manager is not initialized");
     }
+
     gameId = parseInt(gameId, 10);
+
+    // Ensure the currently selected account actually owns this game
     const game = gameArray.find(g => g.id === gameId);
     if (!game) {
-        console.error(`Game with ID ${gameId} not found`);
-        throw new Error(`Game with ID ${gameId} not found`);
+        console.error(`Game with ID ${gameId} not found for current account`);
+        return {
+            success: false,
+            message: `Selected account does not own game ID ${gameId}`
+        };
     }
+
     const mainExecutable = read_config(gameId, 'mainExecutable');
     if (!mainExecutable) {
         console.error(`Main executable for game ID ${gameId} not found`);
-        throw new Error(`Main executable for game ID ${gameId} not found`);
+        return {
+            success: false,
+            message: `Main executable for game ID ${gameId} not found`
+        };
     }
-    console.info(`Launching game ID ${gameId} with executable ${mainExecutable}`);
 
     // check if the executable exists
     if (!fs.existsSync(mainExecutable)) {
         console.error(`Main executable for game ID ${gameId} does not exist at ${mainExecutable}`);
-        throw new Error(`Main executable for game ID ${gameId} does not exist at ${mainExecutable}`);
+        return {
+            success: false,
+            message: `Main executable for game ID ${gameId} does not exist at ${mainExecutable}`
+        };
     }
+
+    console.info(`Launching game ID ${gameId} with executable ${mainExecutable}`);
 
     try {
         const child = spawn(mainExecutable, [], {
@@ -603,18 +620,17 @@ ipcMain.handle('launch-game', (event, gameId) => {
         ipcMain.emit('je-me-barre');
 
         console.info(`Game ID ${gameId} launched successfully`);
-        event.sender.send('launch-game-response', {
+        return {
             success: true,
             message: `Game ID ${gameId} launched successfully`
-        });
+        };
     } catch (error) {
         console.error(`Error launching game ID ${gameId}: ${error.message}`);
-        event.sender.send('launch-game-response', {
+        return {
             success: false,
             message: `Error launching game: ${error.message}`
-        });
+        };
     }
-
 });
 
 
